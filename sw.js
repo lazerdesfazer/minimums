@@ -1,5 +1,5 @@
 // Offline-Cache für den Mindestmaße-Trainer
-const CACHE = "mindestmasse-v2";
+const CACHE = "mindestmasse-v4";
 const CORE = ["./", "./index.html", "./manifest.webmanifest", "./apple-touch-icon.png", "./icon-192.png", "./icon-512.png"];
 self.addEventListener("install", e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(CORE)).then(() => self.skipWaiting())); });
 self.addEventListener("activate", e => {

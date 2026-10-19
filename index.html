@@ -6,8 +6,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Mindestmaße">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="theme-color" content="#F3F5F0">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="theme-color" content="#131714">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
@@ -17,23 +17,15 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Source+Sans+3:wght@400;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <style>
 /* Layout: ein Arbeitsblatt – schmale Kopfzeile, klebende Werkzeugleiste mit Maßband-Fortschritt, darunter die Prüfungstabelle */
+/* Bewusst nur dunkles Design (auf Wunsch immer dunkel, unabhängig von der Systemeinstellung) */
 :root{
-  --bg:#F3F5F0; --surface:#FFFFFF; --field:#FAFBF8; --ink:#1E2520; --muted:#5C665E; --line:#D7DCD2;
-  --accent:#2C5A47; --on-accent:#FFFFFF; --tape:#E6B422; --tape-ink:#2A2208;
-  --ok:#23704A; --ok-bg:#E2F1E7; --bad:#B0281F; --bad-bg:#FBE5E2; --warn-bg:#FFF4D6;
+  --bg:#131714; --surface:#1B201C; --field:#111512; --ink:#E6EAE3; --muted:#9BA69D; --line:#303830;
+  --accent:#86BFA2; --on-accent:#0E1511; --tape:#DDB03A; --tape-ink:#1E1806;
+  --ok:#74D19C; --ok-bg:#16301F; --bad:#F2928A; --bad-bg:#3A1C1A; --warn-bg:#3A3015;
   --f-display:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
   --f-body:"Source Sans 3",system-ui,-apple-system,"Segoe UI",sans-serif;
   --f-mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
-}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#131714; --surface:#1B201C; --field:#111512; --ink:#E6EAE3; --muted:#9BA69D; --line:#303830;
-  --accent:#86BFA2; --on-accent:#0E1511; --tape:#DDB03A; --tape-ink:#1E1806;
-  --ok:#74D19C; --ok-bg:#16301F; --bad:#F2928A; --bad-bg:#3A1C1A; --warn-bg:#3A3015; color-scheme:dark;
-}}
-:root[data-theme="dark"]{
-  --bg:#131714; --surface:#1B201C; --field:#111512; --ink:#E6EAE3; --muted:#9BA69D; --line:#303830;
-  --accent:#86BFA2; --on-accent:#0E1511; --tape:#DDB03A; --tape-ink:#1E1806;
-  --ok:#74D19C; --ok-bg:#16301F; --bad:#F2928A; --bad-bg:#3A1C1A; --warn-bg:#3A3015; color-scheme:dark;
+  color-scheme:dark;
 }
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5}
@@ -130,7 +122,8 @@ button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
   thead{display:none}
   tbody{display:flex;flex-direction:column;gap:10px}
   tbody tr{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px}
-  tbody td,tbody tr:last-child td{display:block;border:0;padding:0;width:auto;text-align:left}
+  tbody td,tbody tr:last-child td{display:block;border:0;padding:0;text-align:left}
+  tbody td.art,tbody td.num,tbody td.chk{width:auto;white-space:normal;text-align:left}
   td.art{grid-column:1/-1;min-width:0;padding-bottom:2px}
   td.art input{max-width:none}
   .en{font-size:1.05rem}
@@ -196,7 +189,7 @@ button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
       <h2>Eingabe</h2>
       <ul>
         <li>Dezimalzahlen mit Komma oder Punkt (23,75 oder 23.75). Brüche gehen auch: 23 3/4.</li>
-        <li>Hyena (Brown) bei SCI wird nicht abgefragt, weil SCI dort kein Mindestmaß festlegt („ED“).</li>
+        <li>Brown Hyena bei SCI wird nicht abgefragt, weil SCI dort kein Mindestmaß festlegt („ED“).</li>
         <li>Elefant: Gewicht beider Stoßzähne in <b>lb</b>, nicht Länge.</li>
         <li>Namen nur auf Englisch, wie in der NQC-Liste (z. B. Springbuck, Steenbuck). Gängige englische Varianten wie Springbok oder Gemsbok zählen auch. Bei Eland, Impala, Hyena, Wildebeest und Rhino die Unterscheidung mit angeben (z. B. „Cape Eland“, „Black Rhino“).</li>
         <li>Enter springt ins nächste Feld (am iPhone die Pfeile über der Tastatur). Leere Felder zählen bei der Auswertung als falsch.</li>
@@ -230,20 +223,20 @@ const DATA = [
  {id:"cro", en:"Crocodile", de:"Nilkrokodil", nqc:393, sci:115, rw:162, al:["crocodile","nile crocodile","nilkrokodil","krokodil","croc"]},
  {id:"dik", en:"Dik-Dik (Damara)", de:"Damara-Dikdik", nqc:16, sci:7, rw:2.5, al:["dik dik","dikdik","damara dik dik","damara dikdik","dik dik damara"]},
  {id:"dui", en:"Duiker", de:"Kronenducker", nqc:25, sci:11, rw:4.5, al:["duiker","bush duiker","grey duiker","kronenducker","ducker","southern bush duiker"]},
- {id:"elc", en:"Eland (Cape)", de:"Kap-Elenantilope", nqc:176, sci:77, rw:35, al:["eland cape","cape eland","kap eland","kapeland","kap elenantilope","elenantilope cape","elenantilope kap"]},
- {id:"ell", en:"Eland (Livingston)", de:"Livingstone-Elenantilope", nqc:181, sci:79, rw:35, al:["eland livingston","eland livingstone","livingston eland","livingstone eland","livingstones eland","livingstone elenantilope","livingston elenantilope","elenantilope livingstone"]},
+ {id:"elc", en:"Cape Eland", de:"Kap-Elenantilope", nqc:176, sci:77, rw:35, al:["eland cape","cape eland","kap eland","kapeland","kap elenantilope","elenantilope cape","elenantilope kap"]},
+ {id:"ell", en:"Livingston Eland", de:"Livingstone-Elenantilope", nqc:181, sci:79, rw:35, al:["eland livingston","eland livingstone","livingston eland","livingstone eland","livingstones eland","livingstone elenantilope","livingston elenantilope","elenantilope livingstone"]},
  {id:"ele", en:"Elephant", de:"Elefant", nqc:90, sci:90, rw:120, unit:"lb", note:"Gewicht beider Stoßzähne in lb", al:["elephant","elefant"]},
  {id:"hip", en:"Hippopotamus", de:"Flusspferd", nqc:114, sci:50, rw:24, al:["hippopotamus","hippo","flusspferd","nilpferd"]},
- {id:"hyb", en:"Hyena (Brown)", de:"Braune Hyäne", nqc:27, sci:null, rw:15, al:["brown hyena","hyena brown","braune hyäne","schabrackenhyäne","strandwolf","brown hyaena"]},
- {id:"hys", en:"Hyena (Spotted)", de:"Tüpfelhyäne", nqc:34, sci:15, rw:16, al:["spotted hyena","hyena spotted","tüpfelhyäne","fleckenhyäne","spotted hyaena"]},
- {id:"imp", en:"Impala", de:"Schwarzfersenantilope", nqc:123, sci:52, rw:23.75, al:["impala","schwarzfersenantilope"]},
- {id:"bfi", en:"Impala (Black-Faced)", de:"Schwarznasen-Impala", nqc:114, sci:47, rw:21, al:["black faced impala","blackfaced impala","impala black faced","schwarznasen impala","schwarznasenimpala","angola impala","angolan impala"]},
+ {id:"hyb", en:"Brown Hyena", de:"Braune Hyäne", nqc:27, sci:null, rw:15, al:["brown hyena","hyena brown","braune hyäne","schabrackenhyäne","strandwolf","brown hyaena"]},
+ {id:"hys", en:"Spotted Hyena", de:"Tüpfelhyäne", nqc:34, sci:15, rw:16, al:["spotted hyena","hyena spotted","tüpfelhyäne","fleckenhyäne","spotted hyaena"]},
+ {id:"imp", en:"Common Impala", de:"Schwarzfersenantilope", nqc:123, sci:52, rw:23.75, al:["impala","schwarzfersenantilope"]},
+ {id:"bfi", en:"Black-faced Impala", de:"Schwarznasen-Impala", nqc:114, sci:47, rw:21, al:["black faced impala","blackfaced impala","impala black faced","schwarznasen impala","schwarznasenimpala","angola impala","angolan impala"]},
  {id:"kli", en:"Klipspringer", de:"Klippspringer", nqc:25, sci:10, rw:4.125, al:["klipspringer","klippspringer"]},
  {id:"kud", en:"Kudu (Greater)", de:"Großer Kudu", nqc:276, sci:121, rw:54, al:["kudu","greater kudu","kudu greater","großer kudu","grosser kudu","großkudu"]},
  {id:"lec", en:"Lechwe", de:"Litschi-Moorantilope", nqc:132, sci:58, rw:26, al:["lechwe","red lechwe","litschi moorantilope","litschi","moorantilope","rote litschi"]},
  {id:"leo", en:"Leopard", de:"Leopard", nqc:32, sci:14, rw:15.25, al:["leopard"]},
  {id:"lio", en:"Lion", de:"Löwe", nqc:52, sci:24, rw:24, al:["lion","löwe"]},
- {id:"ory", en:"Oryx (Namibia)", de:"Spießbock", nqc:178, sci:80, rw:40, al:["oryx","gemsbok","gemsbock","spießbock","oryx namibia","oryxantilope","kalahari gemsbok"]},
+ {id:"ory", en:"Oryx", de:"Spießbock", nqc:178, sci:80, rw:40, al:["oryx","gemsbok","gemsbock","spießbock","oryx namibia","oryxantilope","kalahari gemsbok"]},
  {id:"rhb", en:"Red Hartebeest", de:"Kuhantilope", nqc:141, sci:62, rw:23, al:["red hartebeest","hartebeest","hartebeest red","kuhantilope","rote kuhantilope","kaama"]},
  {id:"ree", en:"Reedbuck", de:"Riedbock", nqc:48, sci:21, rw:13, al:["reedbuck","riedbock","großriedbock","großer riedbock"]},
  {id:"rbk", en:"Rhino (Black)", de:"Spitzmaulnashorn", nqc:128, sci:56, rw:22, al:["black rhino","rhino black","black rhinoceros","spitzmaulnashorn","schwarzes nashorn"]},
