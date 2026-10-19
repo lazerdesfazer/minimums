@@ -1,0 +1,25 @@
+Mindestmaße-Trainer – Offline-Web-App für das iPhone
+====================================================
+
+Inhalt: index.html, sw.js, manifest.webmanifest, drei App-Icons.
+
+Warum ein Webserver nötig ist
+Damit Safari die Seite offline speichert (Service Worker), muss sie einmal
+über eine https-Adresse geladen werden. Eine lokal geöffnete Datei reicht
+dafür auf dem iPhone nicht.
+
+Einrichten (einmalig, z. B. mit GitHub Pages – kostenlos, GitHub-Konto nötig)
+1. Auf github.com ein neues öffentliches Repository anlegen.
+2. Alle Dateien aus diesem Ordner hochladen ("Add file" > "Upload files").
+3. Settings > Pages > Branch "main" / Ordner "/ (root)" > Save.
+4. Nach etwa einer Minute ist die Seite unter
+   https://<benutzername>.github.io/<repository>/ erreichbar.
+
+Auf dem iPhone
+1. Die Adresse in Safari öffnen (mit Internet) und kurz warten.
+2. Teilen-Symbol > "Zum Home-Bildschirm".
+3. Die App einmal vom Home-Bildschirm aus öffnen, solange noch Internet da ist.
+4. Danach funktioniert sie auch im Flugmodus.
+
+Hinweis: Jeder andere https-Webspace funktioniert genauso. Die Ergebnisliste
+"Bisherige Durchläufe" wird auf dem Gerät gespeichert.

@@ -1,0 +1,506 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Mindestmaße">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#F3F5F0">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Mindestmaße-Trainer</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Source+Sans+3:wght@400;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: ein Arbeitsblatt – schmale Kopfzeile, klebende Werkzeugleiste mit Maßband-Fortschritt, darunter die Prüfungstabelle */
+:root{
+  --bg:#F3F5F0; --surface:#FFFFFF; --field:#FAFBF8; --ink:#1E2520; --muted:#5C665E; --line:#D7DCD2;
+  --accent:#2C5A47; --on-accent:#FFFFFF; --tape:#E6B422; --tape-ink:#2A2208;
+  --ok:#23704A; --ok-bg:#E2F1E7; --bad:#B0281F; --bad-bg:#FBE5E2; --warn-bg:#FFF4D6;
+  --f-display:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
+  --f-body:"Source Sans 3",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#131714; --surface:#1B201C; --field:#111512; --ink:#E6EAE3; --muted:#9BA69D; --line:#303830;
+  --accent:#86BFA2; --on-accent:#0E1511; --tape:#DDB03A; --tape-ink:#1E1806;
+  --ok:#74D19C; --ok-bg:#16301F; --bad:#F2928A; --bad-bg:#3A1C1A; --warn-bg:#3A3015; color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#131714; --surface:#1B201C; --field:#111512; --ink:#E6EAE3; --muted:#9BA69D; --line:#303830;
+  --accent:#86BFA2; --on-accent:#0E1511; --tape:#DDB03A; --tape-ink:#1E1806;
+  --ok:#74D19C; --ok-bg:#16301F; --bad:#F2928A; --bad-bg:#3A1C1A; --warn-bg:#3A3015; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.wrap{max-width:900px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px 48px;display:flex;flex-direction:column;gap:20px}
+header h1{font-family:var(--f-display);font-weight:700;font-size:2.1rem;line-height:1.05;letter-spacing:.01em;margin:0;text-wrap:balance}
+header p{margin:6px 0 0;color:var(--muted);max-width:65ch}
+.eyebrow{font-family:var(--f-display);font-weight:600;text-transform:uppercase;letter-spacing:.12em;font-size:.8rem;color:var(--muted)}
+
+/* Werkzeugleiste */
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:10px;border-bottom:1px solid var(--line);display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px}
+.bar .meta{display:flex;flex-direction:column;gap:6px;flex:1 1 260px;min-width:0}
+.bar .row1{display:flex;justify-content:space-between;gap:12px;font-size:.9rem}
+.bar .row1 b{font-family:var(--f-display);font-size:1.05rem;letter-spacing:.02em}
+.count{font-family:var(--f-mono);font-variant-numeric:tabular-nums;color:var(--muted)}
+.tape{position:relative;height:14px;border-radius:3px;background:var(--surface);border:1px solid var(--line);overflow:hidden}
+.tape .fill{position:absolute;inset:0 auto 0 0;width:0;background:var(--tape);transition:width .2s}
+.tape::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(90deg,transparent 0 calc(10% - 1px),color-mix(in srgb,var(--ink) 45%,transparent) calc(10% - 1px) 10%),
+             repeating-linear-gradient(90deg,transparent 0 calc(2% - 1px),color-mix(in srgb,var(--ink) 22%,transparent) calc(2% - 1px) 2%);
+  -webkit-mask:linear-gradient(to bottom,#000 0 45%,transparent 45%);mask:linear-gradient(to bottom,#000 0 45%,transparent 45%)}
+button{font:inherit;cursor:pointer}
+.btn{font-family:var(--f-display);font-weight:600;font-size:1.05rem;letter-spacing:.04em;text-transform:uppercase;border:0;border-radius:6px;padding:10px 18px;background:var(--accent);color:var(--on-accent)}
+.btn:hover{filter:brightness(1.08)}
+.btn:focus-visible,input:focus-visible{outline:3px solid var(--tape);outline-offset:2px}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn.armed{background:var(--bad-bg);color:var(--bad);border-color:var(--bad)}
+.msg{font-size:.9rem;color:var(--muted)}
+.msg:empty{display:none}
+
+/* Ergebnis */
+.result{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:18px 20px;display:flex;flex-wrap:wrap;gap:16px 32px;align-items:center}
+.score{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.score .big{font-family:var(--f-display);font-weight:700;font-size:2.6rem;line-height:1;font-variant-numeric:tabular-nums}
+.score .pct{font-family:var(--f-mono);font-size:1.2rem;font-weight:600;padding:2px 10px;border-radius:999px}
+.pct.good{background:var(--ok-bg);color:var(--ok)} .pct.mid{background:var(--warn-bg);color:var(--ink)} .pct.low{background:var(--bad-bg);color:var(--bad)}
+.parts{display:grid;grid-template-columns:repeat(4,minmax(70px,1fr));gap:4px 18px;flex:1 1 320px}
+.parts div{display:flex;flex-direction:column}
+.parts span{font-size:.75rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
+.parts b{font-family:var(--f-mono);font-variant-numeric:tabular-nums;font-weight:500}
+
+/* Tabelle */
+.tablebox{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:8px}
+table{border-collapse:collapse;width:100%;min-width:640px}
+th,td{padding:7px 10px;border-bottom:1px solid var(--line);vertical-align:middle;text-align:left}
+tbody tr:last-child td{border-bottom:0}
+thead th{font-family:var(--f-display);font-weight:600;font-size:.95rem;letter-spacing:.06em;text-transform:uppercase;background:var(--field);position:sticky;top:0}
+thead th small{display:block;font-family:var(--f-body);font-size:.72rem;letter-spacing:.04em;text-transform:none;color:var(--muted);font-weight:400}
+th.num,td.num{width:20%;text-align:right}
+th.chk,td.chk{width:1%;white-space:nowrap;text-align:center}
+.rowbtn{font-family:var(--f-display);font-weight:600;font-size:.85rem;letter-spacing:.05em;text-transform:uppercase;border:1px solid var(--accent);color:var(--accent);background:transparent;border-radius:5px;padding:5px 10px}
+.rowbtn:hover{background:var(--ok-bg)}
+.rowbtn:focus-visible{outline:3px solid var(--tape);outline-offset:2px}
+.rowres{font-family:var(--f-mono);font-variant-numeric:tabular-nums;font-size:.9rem;font-weight:600}
+.rowres.good{color:var(--ok)} .rowres.part{color:var(--bad)}
+.finish{display:flex;flex-direction:column;gap:14px}
+.actions{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+td.art{min-width:150px}
+.en{font-weight:600}
+.de{display:block;font-size:.82rem;color:var(--muted)}
+.note{display:block;font-size:.75rem;color:var(--muted);font-style:italic}
+.val{font-family:var(--f-mono);font-variant-numeric:tabular-nums;font-size:1rem}
+.unit{font-size:.75rem;color:var(--muted);margin-left:3px}
+input[type=text]{width:100%;font:inherit;font-size:16px;padding:6px 8px;border:1px solid var(--line);border-radius:5px;background:var(--field);color:var(--ink)}
+td.num input{font-family:var(--f-mono);text-align:right;max-width:110px}
+td.art input{max-width:240px}
+input.empty{border-color:var(--bad);background:var(--bad-bg)}
+input:disabled{opacity:1;-webkit-text-fill-color:var(--ink)}
+td.ok{background:var(--ok-bg)}
+td.ok input{background:transparent;border-color:transparent}
+td.bad input{border:2px solid var(--bad);background:var(--field)}
+.sol{display:block;font-size:.85rem;margin-top:3px;font-family:var(--f-mono)}
+td.ok .sol{color:var(--ok)}
+td.bad .sol .x{color:var(--bad);font-size:.75rem}
+td.bad .sol .fix{color:var(--ok);font-weight:600}
+td.art .sol{font-family:var(--f-body);font-weight:600}
+
+/* Hinweise / Verlauf */
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.cols > section{min-width:0}
+h2{font-family:var(--f-display);font-weight:600;font-size:1.25rem;letter-spacing:.02em;margin:0 0 8px}
+.small{font-size:.88rem;color:var(--muted)}
+.small ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px}
+.hist{list-style:none;margin:0;padding:0;font-family:var(--f-mono);font-size:.85rem;font-variant-numeric:tabular-nums}
+.hist li{display:flex;justify-content:space-between;gap:12px;padding:4px 0;border-bottom:1px dashed var(--line)}
+.inwrap{display:flex;gap:6px;justify-content:flex-end;align-items:center}
+button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+@media (max-width:640px){
+  .cols{grid-template-columns:1fr}.parts{grid-template-columns:repeat(2,1fr)}header h1{font-size:1.7rem}
+  .wrap{padding-block:16px 40px;gap:16px}
+  .bar .btn{padding:10px 14px}
+  .tablebox{background:transparent;border:0;border-radius:0;overflow:visible}
+  table{min-width:0}
+  thead{display:none}
+  tbody{display:flex;flex-direction:column;gap:10px}
+  tbody tr{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px}
+  tbody td,tbody tr:last-child td{display:block;border:0;padding:0;width:auto;text-align:left}
+  td.art{grid-column:1/-1;min-width:0;padding-bottom:2px}
+  td.art input{max-width:none}
+  .en{font-size:1.05rem}
+  td.num{background:var(--field);border:1px solid var(--line);border-radius:6px;padding:6px 8px;min-width:0}
+  td.num::before{content:attr(data-label);display:block;font-family:var(--f-display);font-weight:600;font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:3px}
+  td.num input{max-width:none;text-align:left;padding:6px}
+  td.num .inwrap{justify-content:stretch}
+  td.num.ok{background:var(--ok-bg);border-color:transparent}
+  td.num.bad{background:var(--field)}
+  td.chk{grid-column:1/-1}
+  .rowbtn{width:100%;padding:10px;font-size:.95rem}
+  .rowres{display:block;text-align:right}
+  .actions .btn{flex:1 1 40%}
+}
+@media (prefers-reduced-motion:reduce){.tape .fill{transition:none}}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Hunting Guide · Theorie</div>
+    <h1>Mindestmaße-Trainer NQC · SCI · RW</h1>
+    <p>Alle 35 Arten pro Durchlauf. In zwei Dritteln der Zeilen trägst du die drei Mindestwerte ein, in einem Drittel den Namen der Art. Nach jedem Durchlauf werden Zeilen und Aufgabentyp neu gemischt.</p>
+  </header>
+
+  <div class="bar" id="bar">
+    <div class="meta">
+      <div class="row1"><b id="roundLabel">Durchlauf 1</b><span class="count" id="count">0 / 0 ausgefüllt</span></div>
+      <div class="tape" aria-hidden="true"><div class="fill" id="fill"></div></div>
+    </div>
+    <button class="btn ghost" id="nextBtn" type="button">Neuer Durchlauf</button>
+  </div>
+
+  <div class="tablebox">
+    <table>
+      <thead><tr>
+        <th>Art</th>
+        <th class="num">NQC<small>minimum, cm</small></th>
+        <th class="num">SCI<small>minimum, inch</small></th>
+        <th class="num">RW<small>minimum, inch</small></th>
+        <th class="chk">Zeile<small>prüfen</small></th>
+      </tr></thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+
+  <section class="finish">
+    <div class="actions">
+      <button class="btn" id="checkBtn" type="button">Auswerten</button>
+      <button class="btn" id="nextBtn2" type="button" hidden>Neuer Durchlauf</button>
+      <button class="btn ghost" id="resetBtn" type="button">Zähler zurücksetzen</button>
+      <span class="msg" id="msg" role="status"></span>
+    </div>
+    <div class="result" id="result" hidden aria-live="polite">
+      <div class="score"><span class="big" id="scoreBig"></span><span class="pct" id="scorePct"></span></div>
+      <div class="parts" id="parts"></div>
+    </div>
+  </section>
+
+  <div class="cols">
+    <section class="small">
+      <h2>Eingabe</h2>
+      <ul>
+        <li>Dezimalzahlen mit Komma oder Punkt (23,75 oder 23.75). Brüche gehen auch: 23 3/4.</li>
+        <li>Hyena (Brown) bei SCI wird nicht abgefragt, weil SCI dort kein Mindestmaß festlegt („ED“).</li>
+        <li>Elefant: Gewicht beider Stoßzähne in <b>lb</b>, nicht Länge.</li>
+        <li>Namen nur auf Englisch, wie in der NQC-Liste (z. B. Springbuck, Steenbuck). Gängige englische Varianten wie Springbok oder Gemsbok zählen auch. Bei Eland, Impala, Hyena, Wildebeest und Rhino die Unterscheidung mit angeben (z. B. „Cape Eland“, „Black Rhino“).</li>
+        <li>Enter springt ins nächste Feld (am iPhone die Pfeile über der Tastatur). Leere Felder zählen bei der Auswertung als falsch.</li>
+        <li>Am iPhone öffnet sich für Zahlen die Zifferntastatur.</li>
+        <li>„Auswerten“ in der letzten Spalte zeigt die Lösung einer einzelnen Zeile. Die Zeile ist danach gesperrt und zählt mit diesem Ergebnis in die Gesamtauswertung unter der Tabelle.</li>
+        <li>„Neuer Durchlauf“ mischt jederzeit neu, auch ohne Auswertung.</li>
+        <li>„Zähler zurücksetzen“ (zweimal klicken) setzt auf Durchlauf 1 zurück und leert die Liste der bisherigen Durchläufe.</li>
+      </ul>
+    </section>
+    <section class="small">
+      <h2>Bisherige Durchläufe</h2>
+      <ul class="hist" id="hist"><li><span>Noch keine Durchläufe</span><span></span></li></ul>
+    </section>
+  </div>
+
+  <section class="small">
+    <h2>Quelle der Werte</h2>
+    <p style="margin:0;max-width:75ch">Datei „Mindestmasse_NQC_SCI_RW.xlsx“: NQC = Spalte „Total Score“ der NAPHA-Liste (NQC_Minimum_Measurements.pdf); SCI = „Min. Gen.“ aus dem SCI Official Measurer’s Manual (Sept. 2019); RW = Rowland Ward, African Minimums (31st edn., Stand 2021-01). Warzenschwein NQC: nur längster Hauer. Die NQC-Werte für Krokodil (393) und Warzenschwein (32) weichen im PDF vom Muster ab und sind unverändert übernommen.</p>
+  </section>
+</div>
+
+<script>
+(function(){
+const DATA = [
+ {id:"bwb", en:"Black Wildebeest", de:"Weißschwanzgnu", nqc:165, sci:72, rw:23, al:["black wildebeest","weißschwanzgnu","white tailed gnu","schwarzes gnu","black gnu"]},
+ {id:"bles", en:"Blesbuck", de:"Blessbock", nqc:89, sci:40, rw:16.5, al:["blesbuck","blesbok","blessbock","blessbok","blesbock"]},
+ {id:"blwb", en:"Blue Wildebeest", de:"Streifengnu", nqc:160, sci:70, rw:28.5, al:["blue wildebeest","streifengnu","blaues gnu","brindled gnu","blue gnu"]},
+ {id:"buf", en:"Buffalo", de:"Kaffernbüffel", nqc:229, sci:101, rw:64, al:["buffalo","cape buffalo","kaffernbüffel","büffel","kaffernbueffel"]},
+ {id:"car", en:"Caracal", de:"Karakal", nqc:17, sci:6, rw:7, al:["caracal","karakal","wüstenluchs"]},
+ {id:"che", en:"Cheetah", de:"Gepard", nqc:27, sci:11, rw:12, al:["cheetah","gepard"]},
+ {id:"cro", en:"Crocodile", de:"Nilkrokodil", nqc:393, sci:115, rw:162, al:["crocodile","nile crocodile","nilkrokodil","krokodil","croc"]},
+ {id:"dik", en:"Dik-Dik (Damara)", de:"Damara-Dikdik", nqc:16, sci:7, rw:2.5, al:["dik dik","dikdik","damara dik dik","damara dikdik","dik dik damara"]},
+ {id:"dui", en:"Duiker", de:"Kronenducker", nqc:25, sci:11, rw:4.5, al:["duiker","bush duiker","grey duiker","kronenducker","ducker","southern bush duiker"]},
+ {id:"elc", en:"Eland (Cape)", de:"Kap-Elenantilope", nqc:176, sci:77, rw:35, al:["eland cape","cape eland","kap eland","kapeland","kap elenantilope","elenantilope cape","elenantilope kap"]},
+ {id:"ell", en:"Eland (Livingston)", de:"Livingstone-Elenantilope", nqc:181, sci:79, rw:35, al:["eland livingston","eland livingstone","livingston eland","livingstone eland","livingstones eland","livingstone elenantilope","livingston elenantilope","elenantilope livingstone"]},
+ {id:"ele", en:"Elephant", de:"Elefant", nqc:90, sci:90, rw:120, unit:"lb", note:"Gewicht beider Stoßzähne in lb", al:["elephant","elefant"]},
+ {id:"hip", en:"Hippopotamus", de:"Flusspferd", nqc:114, sci:50, rw:24, al:["hippopotamus","hippo","flusspferd","nilpferd"]},
+ {id:"hyb", en:"Hyena (Brown)", de:"Braune Hyäne", nqc:27, sci:null, rw:15, al:["brown hyena","hyena brown","braune hyäne","schabrackenhyäne","strandwolf","brown hyaena"]},
+ {id:"hys", en:"Hyena (Spotted)", de:"Tüpfelhyäne", nqc:34, sci:15, rw:16, al:["spotted hyena","hyena spotted","tüpfelhyäne","fleckenhyäne","spotted hyaena"]},
+ {id:"imp", en:"Impala", de:"Schwarzfersenantilope", nqc:123, sci:52, rw:23.75, al:["impala","schwarzfersenantilope"]},
+ {id:"bfi", en:"Impala (Black-Faced)", de:"Schwarznasen-Impala", nqc:114, sci:47, rw:21, al:["black faced impala","blackfaced impala","impala black faced","schwarznasen impala","schwarznasenimpala","angola impala","angolan impala"]},
+ {id:"kli", en:"Klipspringer", de:"Klippspringer", nqc:25, sci:10, rw:4.125, al:["klipspringer","klippspringer"]},
+ {id:"kud", en:"Kudu (Greater)", de:"Großer Kudu", nqc:276, sci:121, rw:54, al:["kudu","greater kudu","kudu greater","großer kudu","grosser kudu","großkudu"]},
+ {id:"lec", en:"Lechwe", de:"Litschi-Moorantilope", nqc:132, sci:58, rw:26, al:["lechwe","red lechwe","litschi moorantilope","litschi","moorantilope","rote litschi"]},
+ {id:"leo", en:"Leopard", de:"Leopard", nqc:32, sci:14, rw:15.25, al:["leopard"]},
+ {id:"lio", en:"Lion", de:"Löwe", nqc:52, sci:24, rw:24, al:["lion","löwe"]},
+ {id:"ory", en:"Oryx (Namibia)", de:"Spießbock", nqc:178, sci:80, rw:40, al:["oryx","gemsbok","gemsbock","spießbock","oryx namibia","oryxantilope","kalahari gemsbok"]},
+ {id:"rhb", en:"Red Hartebeest", de:"Kuhantilope", nqc:141, sci:62, rw:23, al:["red hartebeest","hartebeest","hartebeest red","kuhantilope","rote kuhantilope","kaama"]},
+ {id:"ree", en:"Reedbuck", de:"Riedbock", nqc:48, sci:21, rw:13, al:["reedbuck","riedbock","großriedbock","großer riedbock"]},
+ {id:"rbk", en:"Rhino (Black)", de:"Spitzmaulnashorn", nqc:128, sci:56, rw:22, al:["black rhino","rhino black","black rhinoceros","spitzmaulnashorn","schwarzes nashorn"]},
+ {id:"rwh", en:"Rhino (White)", de:"Breitmaulnashorn", nqc:160, sci:70, rw:26, al:["white rhino","rhino white","white rhinoceros","breitmaulnashorn","weißes nashorn","square mouthed rhinoceros"]},
+ {id:"roa", en:"Roan", de:"Pferdeantilope", nqc:151, sci:67, rw:26.5, al:["roan","roan antelope","pferdeantilope"]},
+ {id:"sab", en:"Sable", de:"Rappenantilope", nqc:229, sci:96, rw:42, al:["sable","sable antelope","rappenantilope"]},
+ {id:"sit", en:"Sitatunga", de:"Sumpfantilope", nqc:137, sci:60, rw:26, al:["sitatunga","sumpfantilope","zambezi sitatunga"]},
+ {id:"spr", en:"Springbuck", de:"Springbock", nqc:87, sci:35, rw:14, al:["springbuck","springbok","springbock","kalahari springbok"]},
+ {id:"ste", en:"Steenbuck", de:"Steinböckchen", nqc:25, sci:8, rw:4.5, al:["steenbuck","steenbok","steinböckchen","steinbok"]},
+ {id:"tse", en:"Tsessebe", de:"Leierantilope", nqc:92, sci:40, rw:15, al:["tsessebe","sassaby","leierantilope","halbmondantilope"]},
+ {id:"wat", en:"Warthog", de:"Warzenschwein", nqc:32, sci:29, rw:13, note:"NQC: nur längster Hauer", al:["warthog","warzenschwein"]},
+ {id:"wab", en:"Waterbuck", de:"Wasserbock", nqc:160, sci:67, rw:28, al:["waterbuck","wasserbock","ringed waterbuck"]}
+];
+const SYS = ["nqc","sci","rw"];
+const SYS_LABEL = {nqc:"NQC", sci:"SCI", rw:"RW", name:"Namen"};
+const COL_LABEL = {nqc:"NQC · cm", sci:"SCI · inch", rw:"RW · inch"};
+const STOP = new Set(["common","southern","african","afrikanischer","afrikanische","der","die","das","the","gemeiner"]);
+
+/* ---------- Namen normalisieren ---------- */
+function tokens(s){
+  s = String(s).toLowerCase().replace(/ä/g,"ae").replace(/ö/g,"oe").replace(/ü/g,"ue").replace(/ß/g,"ss");
+  return s.replace(/[^a-z0-9]+/g," ").trim().split(" ").filter(t => t && !STOP.has(t));
+}
+function keys(s){ const t = tokens(s); return [t.join(""), [...t].sort().join("")]; }
+/* Nur englische Namen werden gewertet */
+const EN_AL = {
+ bwb:["black wildebeest","white tailed gnu","black gnu","white tailed wildebeest"],
+ bles:["blesbuck","blesbok"],
+ blwb:["blue wildebeest","brindled gnu","blue gnu"],
+ buf:["buffalo","cape buffalo"],
+ car:["caracal"], che:["cheetah"],
+ cro:["crocodile","nile crocodile","croc"],
+ dik:["dik dik","dikdik","damara dik dik","damara dikdik"],
+ dui:["duiker","bush duiker","grey duiker","southern bush duiker"],
+ elc:["eland cape","cape eland"],
+ ell:["eland livingston","eland livingstone","livingston eland","livingstone eland","livingstones eland"],
+ ele:["elephant"],
+ hip:["hippopotamus","hippo"],
+ hyb:["brown hyena","hyena brown","brown hyaena"],
+ hys:["spotted hyena","hyena spotted","spotted hyaena"],
+ imp:["impala"],
+ bfi:["black faced impala","blackfaced impala","impala black faced","angola impala","angolan impala"],
+ kli:["klipspringer"],
+ kud:["kudu","greater kudu","kudu greater"],
+ lec:["lechwe","red lechwe"],
+ leo:["leopard"], lio:["lion"],
+ ory:["oryx","gemsbok","oryx namibia","kalahari gemsbok"],
+ rhb:["red hartebeest","hartebeest","hartebeest red"],
+ ree:["reedbuck"],
+ rbk:["black rhino","rhino black","black rhinoceros"],
+ rwh:["white rhino","rhino white","white rhinoceros","square mouthed rhinoceros"],
+ roa:["roan","roan antelope"], sab:["sable","sable antelope"],
+ sit:["sitatunga","zambezi sitatunga"],
+ spr:["springbuck","springbok","kalahari springbok"],
+ ste:["steenbuck","steenbok"],
+ tse:["tsessebe","sassaby"],
+ wat:["warthog"],
+ wab:["waterbuck","ringed waterbuck"]
+};
+DATA.forEach(sp => {
+  sp.keys = new Set();
+  [sp.en, ...(EN_AL[sp.id] || [])].forEach(a => keys(a).forEach(k => k && sp.keys.add(k)));
+});
+function lev(a,b){
+  const m=a.length,n=b.length; if(Math.abs(m-n)>1) return 2;
+  let prev=Array.from({length:n+1},(_,j)=>j);
+  for(let i=1;i<=m;i++){ const cur=[i]; for(let j=1;j<=n;j++){ cur[j]=Math.min(prev[j]+1,cur[j-1]+1,prev[j-1]+(a[i-1]===b[j-1]?0:1)); } prev=cur; }
+  return prev[n];
+}
+function nameCorrect(input, sp){
+  const k = keys(input);
+  if(!k[0]) return false;
+  const hit = DATA.find(s => k.some(x => s.keys.has(x)));
+  if(hit) return hit === sp;
+  // kleine Tippfehler (1 Zeichen) nur für die gesuchte Art und Namen ab 5 Zeichen
+  return [...sp.keys].some(a => a.length >= 5 && k.some(x => lev(x,a) <= 1));
+}
+
+/* ---------- Zahlen ---------- */
+const UNI = {"¼":.25,"½":.5,"¾":.75,"⅛":.125,"⅜":.375,"⅝":.625,"⅞":.875};
+function parseNum(s){
+  s = String(s).trim().toLowerCase();
+  if(!s) return null;
+  if(s.replace(/[^a-z]/g,"") === "ed") return "ED";
+  s = s.replace(/(cm|inch|in|lbs|lb|zoll)\b/g,"").replace(/["”″]/g,"").trim();
+  let add = 0;
+  for(const [c,v] of Object.entries(UNI)){ if(s.includes(c)){ add += v; s = s.replace(c," "); } }
+  s = s.replace(",",".").trim();
+  let m;
+  if((m = s.match(/^(\d+(?:\.\d+)?)\s+(\d+)\s*\/\s*(\d+)$/))) return +m[1] + (+m[2])/(+m[3]) + add;
+  if((m = s.match(/^(\d+)\s*\/\s*(\d+)$/))) return (+m[1])/(+m[2]) + add;
+  if(s === "" && add) return add;
+  if(/^\d+(\.\d+)?$/.test(s)) return +s + add;
+  return NaN;
+}
+function numCorrect(input, val){
+  const p = parseNum(input);
+  if(val === "ED") return p === "ED";
+  return typeof p === "number" && Math.abs(p - val) < 1e-6;
+}
+const FR = {125:"⅛",25:"¼",375:"⅜",5:"½",625:"⅝",75:"¾",875:"⅞"};
+function fmt(v, withFrac){
+  if(v === null) return "–";
+  if(v === "ED") return "ED";
+  const s = String(v).replace(".",",");
+  if(withFrac && v % 1){ const whole=Math.floor(v), f=Math.round((v-whole)*1000); const key = f===500?5:(f===250?25:(f===750?75:f)); if(FR[key]) return s + " (" + whole + " " + FR[key] + ")"; }
+  return s;
+}
+
+/* ---------- Durchgang ---------- */
+function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+const $ = id => document.getElementById(id);
+let round = 1, rows = [], done = false;
+
+function newRound(){
+  done = false;
+  const order = shuffle(DATA.slice());
+  const nameCount = Math.round(order.length/3);
+  const nameIdx = new Set(shuffle(order.map((_,i)=>i)).slice(0,nameCount));
+  rows = order.map((sp,i) => ({sp, mode: nameIdx.has(i) ? "name" : "num"}));
+  render();
+  $("roundLabel").textContent = "Durchlauf " + round;
+  $("result").hidden = true; $("checkBtn").hidden = false; $("nextBtn2").hidden = true; $("nextBtn").classList.add("ghost"); $("msg").textContent = "";
+  updateProgress();
+}
+
+function unitSpan(sp){ return sp.unit ? '<span class="unit">'+sp.unit+'</span>' : ''; }
+function esc(s){ return String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+
+function render(){
+  const tb = $("tbody"); tb.innerHTML = "";
+  rows.forEach((r, ri) => {
+    const sp = r.sp, tr = document.createElement("tr");
+    if(r.mode === "name"){
+      tr.innerHTML = '<td class="art"><input type="text" id="in-'+sp.id+'-name" data-k="name" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" enterkeyhint="next" placeholder="Art eintragen (englisch)" aria-label="Name der Art"></td>' +
+        SYS.map(s => '<td class="num" data-label="'+COL_LABEL[s]+'"><span class="val">'+fmt(sp[s])+'</span>'+unitSpan(sp)+'</td>').join("");
+    } else {
+      tr.innerHTML = '<td class="art"><span class="en">'+esc(sp.en)+'</span>'+(sp.note?'<span class="note">'+esc(sp.note)+'</span>':'')+'</td>' +
+        SYS.map(s => sp[s] === null ? '<td class="num na" data-label="'+COL_LABEL[s]+'"><span class="val">–</span><span class="note">nicht abgefragt</span></td>' : '<td class="num" data-label="'+COL_LABEL[s]+(sp.unit?' · '+sp.unit:'')+'"><div class="inwrap"><input type="text" inputmode="decimal" id="in-'+sp.id+'-'+s+'" data-k="'+s+'" autocomplete="off" autocorrect="off" spellcheck="false" enterkeyhint="next" placeholder="'+(sp.unit||"")+'" aria-label="'+esc(sp.en)+' '+SYS_LABEL[s]+'"></div></td>').join("");
+    }
+    tr.insertAdjacentHTML("beforeend", '<td class="chk"><button type="button" class="rowbtn" data-row="'+ri+'">Auswerten</button></td>');
+    r.tr = tr; tb.appendChild(tr);
+  });
+}
+
+function allInputs(){ return [...$("tbody").querySelectorAll("input")]; }
+function updateProgress(){
+  const ins = allInputs(), filled = ins.filter(i => i.value.trim()).length;
+  $("count").textContent = filled + " / " + ins.length + " ausgefüllt";
+  $("fill").style.width = (ins.length ? filled/ins.length*100 : 0) + "%";
+}
+
+$("tbody").addEventListener("input", e => { if(e.target.matches("input")){ e.target.classList.remove("empty"); updateProgress(); if(!allInputs().some(i=>!i.value.trim())) $("msg").textContent=""; } });
+$("tbody").addEventListener("keydown", e => {
+  if(e.key !== "Enter" || !e.target.matches("input")) return;
+  e.preventDefault();
+  const ins = allInputs(), i = ins.indexOf(e.target);
+  if(i < ins.length-1) ins[i+1].focus(); else $("checkBtn").focus();
+});
+
+/* Eine Zeile auswerten (einmalig; das Ergebnis zählt später in die Gesamtauswertung) */
+function checkRow(r){
+  if(r.res) return;
+  r.res = [];
+  const sp = r.sp;
+  r.tr.querySelectorAll("input").forEach(inp => {
+    const k = inp.dataset.k, td = inp.closest("td");
+    const ok = k === "name" ? nameCorrect(inp.value, sp) : numCorrect(inp.value, sp[k]);
+    r.res.push({k, ok});
+    inp.disabled = true;
+    td.classList.add(ok ? "ok" : "bad");
+    const sol = document.createElement("span"); sol.className = "sol";
+    const soll = k === "name" ? sp.en : fmt(sp[k], k==="rw") + (sp.unit ? " " + sp.unit : "");
+    if(ok) sol.textContent = k === "name" ? "✓ " + soll : "✓";
+    else sol.innerHTML = '<span class="x">' + (inp.value.trim() ? "✗" : "leer") + '</span> <span class="fix">' + esc(soll) + '</span>';
+    td.appendChild(sol);
+  });
+  const n = r.res.filter(x => x.ok).length, t = r.res.length;
+  r.tr.querySelector("td.chk").innerHTML = '<span class="rowres '+(n===t?'good':'part')+'">'+n+' / '+t+'</span>';
+}
+
+$("tbody").addEventListener("click", e => {
+  const b = e.target.closest(".rowbtn"); if(!b) return;
+  const i = +b.dataset.row; checkRow(rows[i]);
+  const next = rows.slice(i+1).find(r => !r.res);
+  const f = next && next.tr.querySelector("input"); if(f) f.focus();
+});
+
+function evaluate(){
+  if(done) return;
+  done = true;
+  const tally = {nqc:[0,0], sci:[0,0], rw:[0,0], name:[0,0]};
+  rows.forEach(r => { checkRow(r); r.res.forEach(x => { tally[x.k][1]++; if(x.ok) tally[x.k][0]++; }); });
+  const right = Object.values(tally).reduce((a,t)=>a+t[0],0), total = Object.values(tally).reduce((a,t)=>a+t[1],0);
+  const pct = total ? right/total*100 : 0;
+  $("scoreBig").textContent = right + " von " + total + " richtig";
+  const pe = $("scorePct"); pe.textContent = pct.toFixed(1).replace(".",",") + " %";
+  pe.className = "pct " + (pct >= 80 ? "good" : pct >= 50 ? "mid" : "low");
+  $("parts").innerHTML = ["nqc","sci","rw","name"].map(k => '<div><span>'+SYS_LABEL[k]+'</span><b>'+tally[k][0]+' / '+tally[k][1]+'</b></div>').join("");
+  $("result").hidden = false; $("checkBtn").hidden = true; $("nextBtn2").hidden = false; $("nextBtn").classList.remove("ghost"); $("msg").textContent = "";
+  saveHist({round, right, total, pct, t: Date.now()});
+  $("result").scrollIntoView({block:"nearest", behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth"});
+  $("nextBtn2").focus({preventScroll:true});
+}
+
+/* ---------- Verlauf (nur in diesem Browser) ---------- */
+const HK = "mindestmasse-trainer-verlauf";
+let hist = [];
+try { hist = JSON.parse(localStorage.getItem(HK) || "[]") || []; } catch(e){ hist = []; }
+function saveHist(entry){
+  hist.unshift(entry); hist = hist.slice(0,15);
+  try { localStorage.setItem(HK, JSON.stringify(hist)); } catch(e){}
+  showHist();
+}
+function showHist(){
+  const ul = $("hist");
+  if(!hist.length){ ul.innerHTML = '<li><span>Noch keine Durchläufe</span><span></span></li>'; return; }
+  ul.innerHTML = hist.map(h => {
+    const d = new Date(h.t);
+    const ds = d.toLocaleDateString("de-DE",{day:"2-digit",month:"2-digit"}) + " " + d.toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"});
+    return '<li><span>'+ds+'</span><span>'+h.right+' / '+h.total+' · '+h.pct.toFixed(1).replace(".",",")+' %</span></li>';
+  }).join("");
+}
+
+$("checkBtn").addEventListener("click", evaluate);
+function startNext(){ if(done) round++; newRound(); window.scrollTo({top:0}); const f = allInputs()[0]; if(f) f.focus({preventScroll:true}); }
+$("nextBtn").addEventListener("click", startNext);
+$("nextBtn2").addEventListener("click", startNext);
+
+/* Zähler zurücksetzen: zweiter Klick innerhalb von 4 s bestätigt */
+let armTimer = null;
+const resetBtn = $("resetBtn");
+function disarm(){ clearTimeout(armTimer); armTimer = null; resetBtn.classList.remove("armed"); resetBtn.textContent = "Zähler zurücksetzen"; }
+resetBtn.addEventListener("click", () => {
+  if(!armTimer){
+    resetBtn.classList.add("armed"); resetBtn.textContent = "Wirklich zurücksetzen?";
+    armTimer = setTimeout(disarm, 4000);
+    return;
+  }
+  disarm();
+  round = 1; hist = [];
+  try { localStorage.removeItem(HK); } catch(e){}
+  showHist(); newRound();
+  $("msg").textContent = "Zähler zurückgesetzt, neuer Durchlauf 1 gestartet.";
+  window.scrollTo({top:0});
+});
+
+showHist();
+newRound();
+window.__test = {nameCorrect, numCorrect, parseNum, DATA};
+})();
+</script>
+
+<script>
+if ("serviceWorker" in navigator && /^https?:$/.test(location.protocol)) {
+  window.addEventListener("load", function(){ navigator.serviceWorker.register("sw.js").catch(function(){}); });
+}
+</script>
+</body>
+</html>
